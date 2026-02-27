@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Masbeha</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d2318">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#0d2318;min-height:100vh;display:flex;justify-content:center;font-family:Tahoma,Arial,sans-serif;overflow-x:hidden}
+.app{background:linear-gradient(175deg,#112b1c,#0e2419 60%,#0d2016);width:100%;max-width:430px;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 18px 28px;overflow:hidden}
+.main-app{width:100%;display:flex;flex-direction:column;align-items:center;padding-top:22px}
+.tabs{display:flex;width:100%;max-width:340px;background:#0f2318;border-radius:40px;padding:4px;margin-bottom:14px;border:1px solid rgba(100,200,80,.12)}
+.tab{flex:1;padding:9px 0;border-radius:36px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:transparent;color:#5a8a5a;transition:all .2s;touch-action:manipulation}
+.tab.active{background:linear-gradient(135deg,#1e4a2e,#2a6040);color:#c8f0a0;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.page{display:none;width:100%;flex-direction:column;align-items:center}
+.page.active{display:flex}
+.ayah{color:#6fa06a;font-size:13px;text-align:center;margin-bottom:8px;line-height:1.7}
+.dhikr{color:#d4f0c4;font-size:21px;font-weight:600;margin-bottom:6px;letter-spacing:2px}
+.bignum{color:#b8f0a0;font-size:100px;font-weight:900;line-height:1;text-shadow:0 0 40px rgba(130,230,90,.25);margin-bottom:2px;transition:transform .12s cubic-bezier(.36,2,.6,1)}
+.bignum.pop{transform:scale(1.15);color:#d0ffb0}
+.oflabel{color:#4d7a4a;font-size:14px;margin-bottom:18px}
+.ring-wrap{position:relative;width:270px;height:270px;margin-bottom:18px}
+.ring-svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);pointer-events:none}
+.ring-track{fill:none;stroke:#1e4030;stroke-width:10}
+.ring-fill{fill:none;stroke:url(#gg);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .3s ease;filter:drop-shadow(0 0 10px #5de05099)}
+.tap-btn{position:absolute;inset:16px;border-radius:50%;background:radial-gradient(circle at 38% 32%,#1f4832,#102a1c 70%);box-shadow:0 12px 40px rgba(0,0,0,.6),inset 0 2px 10px rgba(255,255,255,.06);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:none;cursor:pointer;transition:transform .12s,box-shadow .12s;overflow:hidden;touch-action:manipulation}
+.tap-btn:active,.tap-btn.pressed{transform:scale(.91);box-shadow:0 4px 16px rgba(0,0,0,.5),inset 0 4px 12px rgba(0,0,0,.5)}
+.tap-emoji{font-size:60px;pointer-events:none}
+.tap-hint{color:#5a9060;font-size:13px;pointer-events:none}
+.daily-box{background:rgba(255,255,255,.04);border:1px solid rgba(100,200,80,.15);border-radius:16px;padding:12px 16px;width:100%;max-width:360px;margin-bottom:12px}
+.dh{display:flex;justify-content:space-between;margin-bottom:7px}
+.dt{color:#90c890;font-size:12px;font-weight:600}
+.dd{color:#4d7a4a;font-size:11px}
+.dcr{display:flex;align-items:baseline;gap:5px;margin-bottom:6px}
+.dc{color:#c8f0a0;font-size:28px;font-weight:800}
+.du{color:#6fa06a;font-size:12px}
+.bar-bg{background:#1a3a28;border-radius:20px;height:7px;overflow:hidden}
+.bar-fill{background:linear-gradient(90deg,#5de050,#a8f060);height:100%;border-radius:20px;transition:width .4s ease}
+.dgr{display:flex;justify-content:space-between;margin-top:4px}
+.dgt{color:#4d7a4a;font-size:11px}
+.dpct{color:#7ab878;font-size:11px;font-weight:700}
+.stats{color:#a0d098;font-size:14px;font-weight:600;margin-bottom:12px;display:flex;gap:14px}
+.stats span{color:#d4f0c4}
+.sep{color:#3a6040}
+.btns{display:flex;gap:10px;width:100%;max-width:360px}
+.btn{flex:1;padding:12px 0;border-radius:50px;font-size:13px;font-weight:700;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:transform .1s;touch-action:manipulation}
+.btn:active{transform:scale(.95)}
+.br{background:#b83a2e;color:#fff}
+.bvib{background:rgba(255,255,255,.06);border:1px solid rgba(100,200,80,.2);color:#88c488}
+.bvib.vib-on{background:rgba(93,224,80,.15);border-color:rgba(93,224,80,.4);color:#a8f060}
+.gc{background:rgba(255,255,255,.04);border:1px solid rgba(100,200,80,.15);border-radius:18px;padding:20px;width:100%;max-width:340px;margin-bottom:14px}
+.gc h3{color:#90c890;font-size:15px;font-weight:700;margin-bottom:14px;text-align:center}
+.gp-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:14px}
+.gp{padding:8px 16px;border-radius:30px;border:1.5px solid #2e5a3c;background:#1c3d2c;color:#88c488;font-size:14px;font-weight:600;cursor:pointer;touch-action:manipulation}
+.gp.sel{background:linear-gradient(135deg,#2a6040,#1e4a2e);color:#c8f0a0;border-color:#4a8a60}
+.gc-row{display:flex;gap:8px}
+.gi{flex:1;background:#1a3a28;border:1.5px solid #2e5a3c;border-radius:12px;padding:10px;color:#c8f0a0;font-size:16px;text-align:center;outline:none}
+.gs-btn{padding:10px 20px;border-radius:30px;border:none;background:#3a8a44;color:#fff;font-size:14px;font-weight:700;cursor:pointer;touch-action:manipulation}
+.gsaved{color:#6ed86a;font-size:13px;text-align:center;margin-top:8px;min-height:18px}
+.hhr{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:340px;margin-bottom:12px}
+.hht{color:#c8eebc;font-size:16px;font-weight:700}
+.del-btns{display:flex;gap:8px}
+.hcl{background:transparent;border:1px solid #5a2020;color:#c06060;font-size:11px;padding:5px 10px;border-radius:20px;cursor:pointer;touch-action:manipulation}
+.hcl2{background:transparent;border:1px solid #7a1010;color:#e04040;font-size:11px;padding:5px 10px;border-radius:20px;cursor:pointer;touch-action:manipulation}
+.gtotal-box{background:linear-gradient(135deg,rgba(93,224,80,.1),rgba(80,180,60,.06));border:1px solid rgba(93,224,80,.3);border-radius:18px;padding:16px 20px;width:100%;max-width:340px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.gt-left{display:flex;flex-direction:column;gap:4px}
+.gt-label{color:#6fa06a;font-size:12px;font-weight:600}
+.gt-num{color:#a8f060;font-size:36px;font-weight:900;line-height:1;text-shadow:0 0 20px rgba(130,230,90,.3)}
+.gt-sub{color:#4d7a4a;font-size:11px}
+.gt-icon{font-size:42px;opacity:.8}
+.hsum{background:rgba(255,255,255,.04);border:1px solid rgba(100,200,80,.1);border-radius:14px;padding:12px;width:100%;max-width:340px;margin-bottom:12px;display:flex;justify-content:space-around}
+.si{display:flex;flex-direction:column;align-items:center;gap:3px}
+.sn{color:#c8f0a0;font-size:20px;font-weight:800}
+.sl{color:#4d7a4a;font-size:11px}
+.hlist{width:100%;max-width:340px;display:flex;flex-direction:column;gap:8px;padding-bottom:20px}
+.hi{background:rgba(255,255,255,.04);border:1px solid rgba(100,200,80,.12);border-radius:14px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.hil{display:flex;flex-direction:column;gap:3px}
+.hid{color:#c8eebc;font-size:13px;font-weight:600}
+.his{color:#4d7a4a;font-size:11px}
+.hir{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.hic{color:#a8f080;font-size:22px;font-weight:800}
+.hip{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px}
+.done{background:rgba(80,200,60,.15);color:#6ed86a}
+.part{background:rgba(200,160,40,.12);color:#c8a040}
+.hempty{color:#4d7a4a;font-size:14px;text-align:center;margin-top:30px}
+.dialog-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center}
+.dialog-overlay.show{display:flex}
+.dialog-box{background:#0f2318;border:1px solid rgba(100,200,80,.25);border-radius:20px;padding:28px 24px;width:82%;max-width:300px;display:flex;flex-direction:column;align-items:center;gap:14px;box-shadow:0 20px 60px rgba(0,0,0,.8)}
+.dialog-icon{font-size:38px}
+.dialog-msg{color:#c8eebc;font-size:15px;text-align:center;line-height:1.6;font-weight:600}
+.dialog-sub{color:#5a8a5a;font-size:12px;text-align:center;margin-top:-6px}
+.dialog-btns{display:flex;gap:10px;width:100%}
+.dialog-cancel{flex:1;padding:11px 0;border-radius:30px;border:1.5px solid #2e5a3c;background:transparent;color:#88c488;font-size:14px;font-weight:700;cursor:pointer;touch-action:manipulation}
+.dialog-ok{flex:1;padding:11px 0;border-radius:30px;border:none;background:#b83a2e;color:#fff;font-size:14px;font-weight:700;cursor:pointer;touch-action:manipulation}
+.ripple{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(100,230,80,.45),rgba(100,230,80,0) 70%);transform:scale(0);animation:rA .6s ease-out forwards;pointer-events:none}
+@keyframes rA{to{transform:scale(4);opacity:0}}
+.particle{position:fixed;pointer-events:none;z-index:50;animation:fU 1s ease-out forwards}
+@keyframes fU{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-120px) scale(.3);opacity:0}}
+.shock{position:absolute;border-radius:50%;border:2px solid rgba(100,230,80,.7);width:60px;height:60px;top:50%;left:50%;transform:translate(-50%,-50%);animation:sA .65s ease-out forwards;pointer-events:none}
+@keyframes sA{to{transform:translate(-50%,-50%) scale(4);opacity:0}}
+.ring-wrap.gp2::after{content:"";position:absolute;inset:-8px;border-radius:50%;border:3px solid rgba(100,220,70,.5);animation:gR .5s ease-out forwards;pointer-events:none}
+@keyframes gR{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.18)}}
+.flash{position:fixed;inset:0;background:radial-gradient(circle at center,rgba(80,220,60,.1),transparent 70%);pointer-events:none;animation:fA .3s ease-out forwards;z-index:10}
+@keyframes fA{0%{opacity:1}100%{opacity:0}}
+.cel{display:none;position:fixed;inset:0;background:rgba(5,18,10,.92);z-index:99;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.cel.show{display:flex}
+.ci{font-size:65px}
+.ct{color:#a0f090;font-size:24px;font-weight:800;text-align:center}
+.cs{color:#6a9a68;font-size:15px;text-align:center;padding:0 20px}
+.cn{margin-top:10px;background:#3a8a44;color:#fff;border:none;padding:14px 40px;border-radius:50px;font-size:16px;font-weight:700;cursor:pointer;touch-action:manipulation}
+.snackbar{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1e4a2e;color:#a8f060;padding:10px 22px;border-radius:30px;font-size:13px;font-weight:600;border:1px solid rgba(100,200,80,.3);opacity:0;transition:opacity .3s;pointer-events:none;z-index:300;white-space:nowrap}
+.snackbar.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="main-app">
+ <div class="tabs">
+  <button class="tab active" id="t0" onclick="showTab(0)">🤲 المسبحة</button>
+  <button class="tab" id="t1" onclick="showTab(1)">🎯 الورد اليومي</button>
+  <button class="tab" id="t2" onclick="showTab(2)">📅 السجل</button>
+ </div>
+
+ <div class="page active" id="p0">
+  <div class="ayah">« فَقُلْتُ اسْتَغْفِرُوا رَبَّكُمْ إِنَّهُ كَانَ غَفَّارًا »</div>
+  <div class="dhikr">أستغفر الله</div>
+  <div class="bignum" id="num">0</div>
+  <div class="oflabel">من 100</div>
+  <div class="ring-wrap" id="rw">
+   <svg class="ring-svg" viewBox="0 0 270 270">
+    <defs><linearGradient id="gg" x1="0%" y1="0%" x2="100%" y2="0%">
+     <stop offset="0%" style="stop-color:#5de050"/>
+     <stop offset="100%" style="stop-color:#a8f060"/>
+    </linearGradient></defs>
+    <circle class="ring-track" cx="135" cy="135" r="123"/>
+    <circle class="ring-fill" id="rf" cx="135" cy="135" r="123"/>
+   </svg>
+   <button class="tap-btn" id="tb">
+    <span class="tap-emoji">🤲</span>
+    <span class="tap-hint">انقر للاستغفار</span>
+   </button>
+  </div>
+  <div class="daily-box">
+   <div class="dh"><div class="dt">تقدم اليوم</div><div class="dd" id="ddate"></div></div>
+   <div class="dcr"><div class="dc" id="dcnt">0</div><div class="du">/ <span id="gdisp">300</span> استغفار</div></div>
+   <div class="bar-bg"><div class="bar-fill" id="dbar" style="width:0%"></div></div>
+   <div class="dgr"><div class="dgt">الورد: <span id="gtxt">300</span></div><div class="dpct" id="dpct">0%</div></div>
+  </div>
+  <div class="stats">الجولة: <span id="ro">1</span><span class="sep"> | </span>الكلي اليوم: <span id="to">0</span></div>
+  <div class="btns">
+   <button class="btn bvib" id="vibBtn" onclick="toggleVib()">📳 اهتزاز: تشغيل</button>
+   <button class="btn br" onclick="rs()">↺ إعادة</button>
+  </div>
+ </div>
+
+ <div class="page" id="p1">
+  <div class="gc">
+   <h3>تحديد الورد اليومي</h3>
+   <div class="gp-row">
+    <button class="gp" onclick="selPreset(100)">100</button>
+    <button class="gp" onclick="selPreset(200)">200</button>
+    <button class="gp" onclick="selPreset(300)">300</button>
+    <button class="gp" onclick="selPreset(500)">500</button>
+    <button class="gp" onclick="selPreset(1000)">1000</button>
+    <button class="gp" onclick="selPreset(3000)">3000</button>
+   </div>
+   <div class="gc-row">
+    <input class="gi" type="number" id="ginp" placeholder="أدخل رقم" min="1">
+    <button class="gs-btn" onclick="saveGoal()">حفظ</button>
+   </div>
+   <div class="gsaved" id="gsaved"></div>
+  </div>
+  <div class="daily-box">
+   <div class="dh"><div class="dt">تقدم اليوم</div><div class="dd" id="ddate2"></div></div>
+   <div class="dcr"><div class="dc" id="dcnt2">0</div><div class="du">/ <span id="gdisp2">300</span></div></div>
+   <div class="bar-bg"><div class="bar-fill" id="dbar2" style="width:0%"></div></div>
+   <div class="dgr"><div></div><div class="dpct" id="dpct2">0%</div></div>
+  </div>
+ </div>
+
+ <div class="page" id="p2">
+  <div class="hhr">
+   <div class="hht">سجل الاستغفار</div>
+   <div class="del-btns">
+    <button class="hcl" onclick="askClear(0)">مسح السجل</button>
+    <button class="hcl2" onclick="askClear(1)">مسح الكل</button>
+   </div>
+  </div>
+  <div class="gtotal-box">
+   <div class="gt-left">
+    <div class="gt-label">📊 إجمالي منذ البداية</div>
+    <div class="gt-num" id="grandTotal">0</div>
+    <div class="gt-sub">استغفار</div>
+   </div>
+   <div class="gt-icon">🤲</div>
+  </div>
+  <div class="hsum" id="hsum"></div>
+  <div class="hlist" id="hlist"></div>
+ </div>
+</div>
+</div>
+
+<!-- Dialog -->
+<div class="dialog-overlay" id="dlg">
+ <div class="dialog-box">
+  <div class="dialog-icon" id="dlgIcon">🗑️</div>
+  <div class="dialog-msg" id="dlgMsg"></div>
+  <div class="dialog-sub" id="dlgSub"></div>
+  <div class="dialog-btns">
+   <button class="dialog-cancel" onclick="closeDlg()">إلغاء</button>
+   <button class="dialog-ok" id="dlgOk">مسح</button>
+  </div>
+ </div>
+</div>
+
+<div class="cel" id="cel">
+ <div class="ci">🎉</div>
+ <div class="ct" id="celTitle"></div>
+ <div class="cs" id="celSub"></div>
+ <button class="cn" onclick="nr()">جولة جديدة ←</button>
+</div>
+
+<div class="snackbar" id="snk"></div>
+
+<script>
+var R=2*Math.PI*123;
+var EM=["✨","⭐","💚","🌿","💫","🌟"];
+var DAY=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+var MON=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+var cnt=0,rnd=1,tot=0,daily=0,goal=300,grandTotal=0;
+var vibOn=true;
+
+function tkey(){return "day_"+new Date().toISOString().slice(0,10);}
+function tstr(){var d=new Date();return DAY[d.getDay()]+" "+d.getDate()+" "+MON[d.getMonth()];}
+
+function load(){
+ try{
+  var r=localStorage.getItem(tkey());
+  if(r){var d=JSON.parse(r);cnt=d.cnt||0;rnd=d.rnd||1;tot=d.tot||0;daily=d.daily||0;}
+  goal=parseInt(localStorage.getItem("goal")||"300");
+  grandTotal=parseInt(localStorage.getItem("grandTotal")||"0");
+  vibOn=localStorage.getItem("vibOn")!=="0";
+ }catch(e){}
+}
+
+function save(){
+ try{
+  localStorage.setItem(tkey(),JSON.stringify({cnt:cnt,rnd:rnd,tot:tot,daily:daily,date:tstr()}));
+  localStorage.setItem("goal",goal);
+  localStorage.setItem("grandTotal",grandTotal);
+  localStorage.setItem("vibOn",vibOn?"1":"0");
+  var keys=[];
+  for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.slice(0,4)==="day_")keys.push(k);}
+  keys.sort();
+  if(keys.length>90){keys.slice(0,keys.length-90).forEach(function(k){localStorage.removeItem(k);});}
+ }catch(e){}
+}
+
+function doVibrate(){
+ if(!vibOn)return;
+ try{if(navigator.vibrate)navigator.vibrate(40);}catch(e){}
+}
+
+function toggleVib(){
+ vibOn=!vibOn;
+ save();
+ updateVibBtn();
+ if(vibOn){try{if(navigator.vibrate)navigator.vibrate(60);}catch(e){}}
+ snack(vibOn ? "📳 الاهتزاز مُفعَّل" : "🔕 الاهتزاز مُوقَف");
+}
+
+function updateVibBtn(){
+ var b=document.getElementById("vibBtn");
+ if(vibOn){b.textContent="📳 اهتزاز: تشغيل";b.classList.add("vib-on");}
+ else{b.textContent="🔕 اهتزاز: إيقاف";b.classList.remove("vib-on");}
+}
+
+function snack(msg){
+ var s=document.getElementById("snk");
+ s.textContent=msg;s.classList.add("show");
+ setTimeout(function(){s.classList.remove("show");},2500);
+}
+
+load();
+var rf=document.getElementById("rf");
+rf.style.strokeDasharray=R;rf.style.strokeDashoffset=R;
+var ds=tstr();
+document.getElementById("ddate").textContent=ds;
+document.getElementById("ddate2").textContent=ds;
+hlPreset(goal);render();updateVibBtn();
+
+// فتح قناة الاهتزاز عند أول لمسة
+document.addEventListener("touchstart",function(){try{if(navigator.vibrate)navigator.vibrate(1);}catch(e){}},{once:true});
+
+var tb=document.getElementById("tb");
+tb.addEventListener("touchend",function(e){e.preventDefault();doTap(e.changedTouches?e.changedTouches[0]:e);});
+tb.addEventListener("click",function(e){e.preventDefault();doTap(e);});
+document.addEventListener("keydown",function(e){if(e.code==="Space"){e.preventDefault();doTap(null);}});
+
+function doTap(e){
+ if(cnt>=100)return;
+ cnt++;tot++;daily++;grandTotal++;
+ save();render();
+ doVibrate();
+ tb.classList.add("pressed");setTimeout(function(){tb.classList.remove("pressed");},150);
+ var rp=document.createElement("div");rp.className="ripple";
+ var s=Math.min(tb.offsetWidth,tb.offsetHeight)*.5;
+ rp.style.cssText="width:"+s+"px;height:"+s+"px;top:50%;left:50%;margin-top:-"+(s/2)+"px;margin-left:-"+(s/2)+"px;position:absolute;";
+ tb.appendChild(rp);rp.addEventListener("animationend",function(){rp.remove();});
+ var sw=document.createElement("div");sw.className="shock";
+ tb.appendChild(sw);sw.addEventListener("animationend",function(){sw.remove();});
+ var rw=document.getElementById("rw");
+ rw.classList.remove("gp2");void rw.offsetWidth;rw.classList.add("gp2");
+ setTimeout(function(){rw.classList.remove("gp2");},520);
+ var numEl=document.getElementById("num");
+ numEl.classList.remove("pop");void numEl.offsetWidth;numEl.classList.add("pop");
+ setTimeout(function(){numEl.classList.remove("pop");},180);
+ var px=e&&e.clientX?e.clientX:window.innerWidth/2;
+ var py=e&&e.clientY?e.clientY:window.innerHeight/2;
+ for(var i=0;i<8;i++)(function(i){setTimeout(function(){
+  var p=document.createElement("div");p.className="particle";
+  p.textContent=EM[Math.floor(Math.random()*EM.length)];
+  p.style.cssText="left:"+(px+(Math.random()-.5)*90)+"px;top:"+(py+(Math.random()-.5)*50)+"px;font-size:"+(14+Math.random()*14)+"px;animation-duration:"+(0.8+Math.random()*.5)+"s;";
+  document.body.appendChild(p);p.addEventListener("animationend",function(){p.remove();});
+ },i*25);})(i);
+ var fl=document.createElement("div");fl.className="flash";
+ document.body.appendChild(fl);fl.addEventListener("animationend",function(){fl.remove();});
+ if(cnt===100){setTimeout(function(){
+  document.getElementById("celTitle").textContent="أتممت الجولة! 🎉";
+  document.getElementById("celSub").textContent="ما شاء الله، الله يقبل منك 🌿";
+  document.getElementById("cel").classList.add("show");
+ },380);}
+}
+
+function render(){
+ document.getElementById("num").textContent=cnt;
+ document.getElementById("ro").textContent=rnd;
+ document.getElementById("to").textContent=tot;
+ rf.style.strokeDashoffset=R-(cnt/100)*R;
+ var pct=Math.min(100,Math.round((daily/goal)*100));
+ ["dcnt","dcnt2"].forEach(function(id){document.getElementById(id).textContent=daily;});
+ ["gdisp","gdisp2","gtxt"].forEach(function(id){document.getElementById(id).textContent=goal;});
+ ["dbar","dbar2"].forEach(function(id){document.getElementById(id).style.width=pct+"%";});
+ ["dpct","dpct2"].forEach(function(id){document.getElementById(id).textContent=pct+"%";});
+}
+
+function nr(){cnt=0;rnd++;document.getElementById("cel").classList.remove("show");render();save();}
+function rs(){cnt=0;rnd=1;tot=0;document.getElementById("cel").classList.remove("show");render();save();}
+
+function hlPreset(v){
+ var ps=document.querySelectorAll(".gp"),vals=[100,200,300,500,1000,3000];
+ for(var i=0;i<ps.length;i++)ps[i].classList[vals[i]===v?"add":"remove"]("sel");
+ document.getElementById("ginp").value=v;
+}
+function selPreset(v){goal=v;hlPreset(v);render();save();}
+function saveGoal(){
+ var v=parseInt(document.getElementById("ginp").value||"0");
+ if(!v||v<1)return;
+ goal=v;hlPreset(v);render();save();
+ var el=document.getElementById("gsaved");
+ el.textContent="✅ " + v;
+ setTimeout(function(){el.textContent="";},2500);
+}
+
+function showTab(n){
+ for(var i=0;i<3;i++){
+  document.getElementById("p"+i).classList[i===n?"add":"remove"]("active");
+  document.getElementById("t"+i).classList[i===n?"add":"remove"]("active");
+ }
+ if(n===2)renderHist();
+}
+
+function getHist(){
+ var keys=[],res=[];
+ for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.slice(0,4)==="day_")keys.push(k);}
+ keys.sort().reverse();
+ keys.forEach(function(k){try{var d=JSON.parse(localStorage.getItem(k));d._k=k;res.push(d);}catch(e){}});
+ return res;
+}
+
+function renderHist(){
+ var hist=getHist(),list=document.getElementById("hlist"),sum=document.getElementById("hsum");
+ list.innerHTML="";sum.innerHTML="";
+ var gt=parseInt(localStorage.getItem("grandTotal")||"0");
+ var gtEl=document.getElementById("grandTotal");
+ if(gt>=1000000){gtEl.innerHTML=(gt/1000000).toFixed(2)+'<span style="font-size:18px;color:#6fa06a"> مليون</span>';}
+ else if(gt>=1000){gtEl.innerHTML=(gt/1000).toFixed(1)+'<span style="font-size:18px;color:#6fa06a"> ألف</span>';}
+ else{gtEl.textContent=gt;}
+ if(!hist.length){list.innerHTML='<div class="hempty">لا يوجد سجل بعد</div>';return;}
+ var total=0;
+ hist.forEach(function(h){total+=(h.daily||0);});
+ var avg=Math.round(total/hist.length);
+ sum.innerHTML='<div class="si"><div class="sn">'+hist.length+'</div><div class="sl">يوم</div></div>'
+  +'<div class="si"><div class="sn">'+total+'</div><div class="sl">آخر 90 يوم</div></div>'
+  +'<div class="si"><div class="sn">'+avg+'</div><div class="sl">معدل/يوم</div></div>';
+ hist.forEach(function(h){
+  var d=h.daily||0,pct=Math.min(100,Math.round((d/goal)*100));
+  var badge=pct>=100?'<span class="hip done">✔ '+pct+'%</span>':'<span class="hip part">'+pct+'%</span>';
+  var el=document.createElement("div");el.className="hi";
+  el.innerHTML='<div class="hil"><div class="hid">'+(h.date||h._k.slice(4))+'</div>'
+   +'<div class="his">'+h._k.slice(4)+'</div></div>'
+   +'<div class="hir"><div class="hic">'+d+'</div>'+badge+'</div>';
+  list.appendChild(el);
+ });
+}
+
+// 0 = مسح السجل فقط | 1 = مسح السجل + الإجمالي الكلي
+var clearMode=0;
+function askClear(mode){
+ clearMode=mode;
+ document.getElementById("dlgIcon").textContent = mode===1 ? "⚠️" : "🗑️";
+ document.getElementById("dlgMsg").textContent = mode===1 ? "مسح كل شيء؟" : "مسح سجل الأيام؟";
+ document.getElementById("dlgSub").textContent = mode===1
+  ? "سيُحذف السجل والإجمالي الكلي نهائياً"
+  : "سيُحذف كل الأيام بما فيها اليوم";
+ document.getElementById("dlg").classList.add("show");
+}
+function closeDlg(){document.getElementById("dlg").classList.remove("show");}
+function doClear(){
+ closeDlg();
+ var keys=[];
+ for(var i=0;i<localStorage.length;i++){
+  var k=localStorage.key(i);
+  if(k&&k.slice(0,4)==="day_")keys.push(k);
+ }
+ keys.forEach(function(k){localStorage.removeItem(k);});
+ cnt=0;rnd=1;tot=0;daily=0;
+ if(clearMode===1){grandTotal=0;localStorage.removeItem("grandTotal");}
+ save();render();renderHist();
+ snack(clearMode===1 ? "✅ تم مسح كل شيء" : "✅ تم مسح السجل");
+}
+document.getElementById("dlgOk").addEventListener("click",doClear);
+
+if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js");}
+</script>
+</body>
+</html>
